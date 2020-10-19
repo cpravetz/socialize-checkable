@@ -3,15 +3,15 @@ import SimpleSchema from 'simpl-schema';
 /* eslint-enable import/no-unresolved */
 
 export default ({ Meteor, Mongo, BaseModel, LinkableModel, ServerTime }) => {
-    const LikesCollection = new Mongo.Collection('socialize:likes');
+    const ChecksCollection = new Mongo.Collection('socialize:checks');
 
-    if (LikesCollection.configureRedisOplog) {
-        LikesCollection.configureRedisOplog({
+    if (ChecksCollection.configureRedisOplog) {
+        ChecksCollection.configureRedisOplog({
             mutation(options, { selector, doc }) {
                 let linkedObjectId = (selector && selector.linkedObjectId) || (doc && doc.linkedObjectId);
 
                 if (!linkedObjectId && selector._id) {
-                    const comment = LikesCollection.findOne({ _id: selector._id }, { fields: { linkedObjectId: 1 } });
+                    const comment = ChecksCollection.findOne({ _id: selector._id }, { fields: { linkedObjectId: 1 } });
                     linkedObjectId = comment && comment.linkedObjectId;
                 }
 
@@ -31,7 +31,7 @@ export default ({ Meteor, Mongo, BaseModel, LinkableModel, ServerTime }) => {
         });
     }
 
-    const LikeSchema = new SimpleSchema({
+    const CheckSchema = new SimpleSchema({
         userId: {
             type: String,
             regEx: SimpleSchema.RegEx.Id,
@@ -54,37 +54,44 @@ export default ({ Meteor, Mongo, BaseModel, LinkableModel, ServerTime }) => {
             },
             denyUpdate: true,
         },
+        checkType: {
+            type: String,
+            defaultValue() {
+                return "";
+            }
+        }
     });
 
     /**
-    * A model of a like which is connected to another database object
-    * @class Like
+    * A model of a check which is connected to another database object
+    * @class Check
     */
-    class Like extends LinkableModel(BaseModel) {
+    class Check extends LinkableModel(BaseModel) {
         /**
-        * Get the User instance of the account which created the like
-        * @returns {User} The user who created the like
+        * Get the User instance of the account which created the check
+        * @returns {User} The user who created the check
         */
         user() {
             return Meteor.users.findOne({ _id: this.userId });
         }
         /**
-        * Check if the user has already liked the linked object
+        * Check if the user has already checked the linked object
+        * Duplicates are allowed
         * @returns {[[Type]]} [[Description]]
         */
         isDuplicate() {
-            return !!LikesCollection.findOne({ userId: this.userId, linkedObjectId: this.linkedObjectId });
+            return !!ChecksCollection.findOne({ userId: this.userId, linkedObjectId: this.linkedObjectId });
         }
     }
 
-    // attach the schema for a like
-    LikesCollection.attachSchema(LikeSchema);
+    // attach the schema for a check
+    ChecksCollection.attachSchema(CheckSchema);
 
-    // attach the LikesCollection to the Like model via BaseModel's attchCollection method
-    Like.attachCollection(LikesCollection);
+    // attach the ChecksCollection to the Check model via BaseModel's attchCollection method
+    Check.attachCollection(ChecksCollection);
 
     // append the linkable schema so we are able to add linking information
-    Like.appendSchema(LinkableModel.LinkableSchema);
+    Check.appendSchema(LinkableModel.LinkableSchema);
 
-    return { Like, LikesCollection };
+    return { Check, ChecksCollection };
 };

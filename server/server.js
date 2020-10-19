@@ -1,27 +1,29 @@
-import { Like, LikeableModel, LikesCollection } from '../common/common.js';
+import { Check, CheckableModel, ChecksCollection } from '../common/common.js';
 import './publications.js';
 
-LikesCollection.allow({
-    insert(userId, like) {
-        // allow liking to occur if a user is logged in, the current user added the like, and they haven't already liked the object
-        return userId && like.checkOwnership() && !like.isDuplicate();
+ChecksCollection.allow({
+    insert(userId, check) {
+        // allow liking to occur if a user is logged in, the current user added the check
+        return userId && check.checkOwnership();
     },
-    remove(userId, like) {
-        // allow unliking if there is a current user and the current user was the one who liked the object
-        return userId && like.checkOwnership();
+    remove(userId, check) {
+        // allow unliking if there is a current user and the current user was the one who checkd the object
+        return userId && check.checkOwnership();
     },
 });
 
-LikesCollection.after.insert(function afterInsert(userId, like) {
-    // after a successful like, increment the linked object's likeCount property
+ChecksCollection.after.insert(function afterInsert(userId, check) {
+    // after a successful check, increment the linked object's checkCount property
     const collection = this.transform().getCollectionForParentLink();
-    userId && collection && collection.update({ _id: like.linkedObjectId }, { $inc: { likeCount: 1 } });
+    var thisType = check.checkType;
+    userId && collection && collection.update({ _id: check.linkedObjectId }, { $inc: { ['checkCount.'+thisType] : 1 } });
 });
 
-LikesCollection.after.remove(function afterRemove(userId, like) {
-    // if the user unlikes an object, decrement the linked objects likeCount property
+ChecksCollection.after.remove(function afterRemove(userId, check) {
+    // if the user unchecks an object, decrement the linked objects checkCount property
     const collection = this.transform().getCollectionForParentLink();
-    userId && collection && collection.update({ _id: like.linkedObjectId }, { $inc: { likeCount: -1 } });
+    var thisType = check.checkType;
+    userId && collection && collection.update({ _id: check.linkedObjectId }, { $inc: { ['checkCount.'+thisType] : -1 } });
 });
 
-export { Like, LikeableModel, LikesCollection };
+export { Check, CheckableModel, ChecksCollection };

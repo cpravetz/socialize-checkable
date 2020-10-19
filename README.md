@@ -1,6 +1,6 @@
-# Likeable
+# Checkable
 
-A package for implementing models with Liking, Starring, or Favoriting capabilities.
+A package for implementing models with Checking.  Bassically, this is Liking but allows multiple "likes" and different typoes of "likes" in the same collection to minimize redundant code.  Typical uses would be check-in, offer-redemptions, etc.
 
 >This is a [Meteor][meteor] package with part of it's code published as a companion NPM package made to work with React Native. This allows your Meteor and React Native projects that use this package to share code between them to give you a competitive advantage when bringing your mobile and web application to market.
 
@@ -25,13 +25,9 @@ meteor npm install --save simpl-schema
 meteor add socialize:likeable
 ```
 
-## React Native Installation
+## React Native
 
-When using this package with React Native, the dependency tree ensures that `simpl-schema` is loaded so there's no need to install it as when using within Meteor.
-
-```shell
-npm install --save @socialize/likeable
-```
+A React Native companion has not been developed for this package.
 
 > **Note**
 >
@@ -39,19 +35,18 @@ npm install --save @socialize/likeable
 
 ## Basic Usage
 
-Depending on the environment your code will be running in, you'll need to import the classes from the packages specific to that environment, either Meteor or React Native.
 
 ```javascript
 //Meteor Imports
 import { Mongo } from 'meteor/mongo';
-import { LikeableModel } from 'meteor/socialize-likeable';
+import { CheckableModel } from 'meteor/socialize-checkable';
 import { LinkParent, LinkableModel } from 'meteor/socialize-linkable';
 ```
 
-```javascript
+```javascript - 
 //React Native Imports
 import { Mongo } from '@socialize/react-native-meteor';
-import { LikeableModel } from '@socialize/likeable';
+import { CheckableModel } from '@socialize/likeable';
 import { LinkParent, LinkableModel } from '@socialize/linkable';
 ```
 
@@ -60,43 +55,45 @@ import { LinkParent, LinkableModel } from '@socialize/linkable';
 import SimpleSchema from 'simpl-schema';
 
 //define the collection to hold products
-const ProductsCollection = new Mongo.Collection("products");
+const PlacesCollection = new Mongo.Collection("places");
 
 //define the schema for a product
-const ProductsSchema = new SimpleSchema({
+const PlacesSchema = new SimpleSchema({
     //actual schema excluded for brevity
 });
 
 //Create a product class extending LikeableModel and LinkParent
-class Product extends LikeableModel(LinkParent) {
+class Place extends CheckableModel(LinkParent) {
     //methods here
 }
 // Attach schema
-ProductsCollection.attachSchema(ProductsSchema);
-// Attache LikeableSchema
-ProductsCollection.appendSchema(LikeableModel.LikeableSchema);
+PlacesCollection.attachSchema(PlacesSchema);
+// Attache CheckableSchema
+PlacesCollection.appendSchema(CheckableModel.CheckableSchema);
 
 
 //Attach the collection to the model so we can use BaseModel's CRUD methods
-Product.attachCollection(ProductsCollection);
+Place.attachCollection(PlacesCollection);
 
 //Register the Model as a potential Parent of a LinkableModel
-LinkableModel.registerParentModel(Product);
+LinkableModel.registerParentModel(Place);
 
-//Create a new product and save it to the database using BaseModel's save method.
-new Product({name:"All Stars", brand:"Converse", price:"39.99"}).save();
+//Create a new place and save it to the database using BaseModel's save method.
+new Place({name:"Carnegie Hall"}).save();
 
-//Get an instance of Product using a findOne call.
-let foundProduct = ProductsCollection.findOne();
+//Get an instance of Place using a findOne call.
+let foundPlace = PlacesCollection.findOne();
 
-//This is an instance of product and since we've extended LikeableModel we can now just call it's like method
-foundProduct.like();
+//This is an instance of place and since we've extended LikeableModel we can now just call it's like method
+foundPlace.check('check-in');
+//or
+foundPlace.check('performed-at');
 
 //and we can unlike it
-foundProduct.unlike();
+foundPlace.uncheck('check-in');
 
-//We can even query to see if a certain user has liked this product
-foundProduct.islikedBy(Meteor.user()); //Publication of proper data necessary if querying client side of course
+//We can even query to see if a certain user has checked this place
+foundPlace.isCheckdBy(Meteor.user(),"check-in"); //Publication of proper data necessary if querying client side of course
 ```
 
 For a more in depth explanation of how to use this package see [API.md](api)

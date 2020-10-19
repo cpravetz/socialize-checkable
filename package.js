@@ -1,9 +1,9 @@
 /* global Package */
 Package.describe({
-    name: 'socialize:likeable',
-    summary: 'A package implementing social "liking" or "starring"',
+    name: 'socialize:checkable',
+    summary: 'A package implementing checkins / flagging',
     version: '1.0.4',
-    git: 'https://github.com/copleykj/socialize-likeable.git',
+    git: 'https://github.com/cpravetz/socialize-checkable.git',
 });
 
 Package.onUse(function _(api) {

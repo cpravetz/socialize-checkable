@@ -1,6 +1,6 @@
 # Checkable
 
-A package for implementing models with Checking.  Bassically, this is Liking but allows multiple "likes" and different typoes of "likes" in the same collection to minimize redundant code.  Typical uses would be check-in, offer-redemptions, etc.
+A package for implementing models with Checking.  Basically, this is Liking but allows multiple "likes" and different typoes of "likes" in the same collection to minimize redundant code.  Typical uses would be check-in, offer-redemptions, etc.
 
 >This is a [Meteor][meteor] package with part of it's code published as a companion NPM package made to work with React Native. This allows your Meteor and React Native projects that use this package to share code between them to give you a competitive advantage when bringing your mobile and web application to market.
 

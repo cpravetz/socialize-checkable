@@ -41,6 +41,24 @@ publishComposite('socialize.checksFor', function publishChecksFor(linkedObjectId
     return this.ready();
 });
 
+publishComposite('socialize.checksForMany', function publishChecksForMany(linkedObjectIds, options = { limit: 100, sort: { createdAt: -1 } }) {
+    check(linkedObjectIds, [String]);
+    check(options, optionsArgumentCheck);
+    // TODO: restore blocked user functionality
+    return {
+        find() {
+            return ChecksCollection.find({ linkedObjectId: {$in: linkedObjectIds}, }, options);
+        },
+        children: [
+            {
+                find(check) {
+                    return Meteor.users.find({ _id: check.userId });
+                },
+            },
+        ],
+    };
+});
+
 publishComposite('socialize.checksBy', function publishChecksBy(aUserId, options = { limit: 100, sort: { createdAt: -1 } }) {
     check(aUserId, String);
     check(options, optionsArgumentCheck);

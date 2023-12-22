@@ -77,7 +77,7 @@ export default ({ Meteor, LinkParent, ChecksCollection, Check }) => {
         *                                     of the userId to check against
         * @returns {Boolean} Wheter the user checks the model or not
         */
-        isCheckdBy(user, thisType) {
+        isCheckedBy(user, thisType) {
             const userId = user._id || user;
             return !!ChecksCollection.findOne({ linkedObjectId: this._id, userId, checkType: thisType });
         }

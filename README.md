@@ -52,7 +52,7 @@ import { LinkParent, LinkableModel } from '@socialize/linkable';
 
 ```javascript
 //This gets imported the same no matter the environment
-import SimpleSchema from 'simpl-schema';
+import SimpleSchema from 'meteor/aldeed:simple-schema';
 
 //define the collection to hold products
 const PlacesCollection = new Mongo.Collection("places");
@@ -82,7 +82,7 @@ LinkableModel.registerParentModel(Place);
 new Place({name:"Carnegie Hall"}).save();
 
 //Get an instance of Place using a findOne call.
-let foundPlace = PlacesCollection.findOne();
+let foundPlace = PlacesCollection.findOneAsync();
 
 //This is an instance of place and since we've extended LikeableModel we can now just call it's like method
 foundPlace.check('check-in');

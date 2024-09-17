@@ -1,5 +1,5 @@
 /* eslint-disable import/no-unresolved */
-import SimpleSchema from 'simpl-schema';
+import SimpleSchema from 'meteor/aldeed:simple-schema';
 /* eslint-enable import/no-unresolved */
 
 export default ({ Meteor, Mongo, BaseModel, LinkableModel, ServerTime }) => {
@@ -7,11 +7,11 @@ export default ({ Meteor, Mongo, BaseModel, LinkableModel, ServerTime }) => {
 
     if (ChecksCollection.configureRedisOplog) {
         ChecksCollection.configureRedisOplog({
-            mutation(options, { selector, doc }) {
+            async mutation(options, { selector, doc }) {
                 let linkedObjectId = (selector && selector.linkedObjectId) || (doc && doc.linkedObjectId);
 
                 if (!linkedObjectId && selector._id) {
-                    const comment = ChecksCollection.findOne({ _id: selector._id }, { fields: { linkedObjectId: 1 } });
+                    const comment = await ChecksCollection.findOneAsync({ _id: selector._id }, { fields: { linkedObjectId: 1 } });
                     linkedObjectId = comment && comment.linkedObjectId;
                 }
 
@@ -34,7 +34,6 @@ export default ({ Meteor, Mongo, BaseModel, LinkableModel, ServerTime }) => {
     const CheckSchema = new SimpleSchema({
         userId: {
             type: String,
-            regEx: SimpleSchema.RegEx.Id,
             autoValue() {
                 if (this.isInsert) {
                     return this.userId;
@@ -71,16 +70,16 @@ export default ({ Meteor, Mongo, BaseModel, LinkableModel, ServerTime }) => {
         * Get the User instance of the account which created the check
         * @returns {User} The user who created the check
         */
-        user() {
-            return Meteor.users.findOne({ _id: this.userId });
+        async user() {
+            return await Meteor.users.findOneAsync({ _id: this.userId });
         }
         /**
         * Check if the user has already checked the linked object
         * Duplicates are allowed
         * @returns {[[Type]]} [[Description]]
         */
-        isDuplicate() {
-            return !!ChecksCollection.findOne({ userId: this.userId, linkedObjectId: this.linkedObjectId });
+        async isDuplicate() {
+            return !!(await ChecksCollection.findOneAsync({ userId: this.userId, linkedObjectId: this.linkedObjectId }));
         }
     }
 

@@ -1,5 +1,5 @@
 /* eslint-disable import/no-unresolved */
-import SimpleSchema from 'simpl-schema';
+import SimpleSchema from 'meteor/aldeed:simple-schema';
 var dateFormat = require('dateformat');
 /* eslint-enable import/no-unresolved */
 
@@ -28,18 +28,18 @@ export default ({ Meteor, LinkParent, ChecksCollection, Check }) => {
         /**
         * Remove one record from the checks collection that is linked to the model
         */
-        uncheck(thisCheckType) {
-            // find and then call call instance.remove() since client
+        async uncheck(thisCheckType) {
+            // find and then call call instance.removeAsync() since client
             // is restricted to removing items by their _id
-            const check = ChecksCollection.findOne({ checkType: thisCheckType, userId: Meteor.userId(), linkedObjectId: this._id });
-            check && check.remove();
+            const check = await ChecksCollection.findOneAsync({ checkType: thisCheckType, userId: Meteor.userId(), linkedObjectId: this._id });
+            check && check.removeAsync();
         }
 
         /**
         * Remove all records from the checks collection that are linked to the model
         */
-        uncheckall() {
-            const checks = ChecksCollection.find({ userId: Meteor.userId(), linkedObjectId: this._id });
+        async uncheckall() {
+            const checks = await ChecksCollection.find({ userId: Meteor.userId(), linkedObjectId: this._id });
             checks.forEach(remove());
 
         }
@@ -77,9 +77,9 @@ export default ({ Meteor, LinkParent, ChecksCollection, Check }) => {
         *                                     of the userId to check against
         * @returns {Boolean} Wheter the user checks the model or not
         */
-        isCheckedBy(user, thisType) {
+        async isCheckedBy(user, thisType) {
             const userId = user._id || user;
-            return !!ChecksCollection.findOne({ linkedObjectId: this._id, userId, checkType: thisType });
+            return !!(await ChecksCollection.findOneAsync({ linkedObjectId: this._id, userId, checkType: thisType }));
         }
         prettyWhen() {
           if (!this.createdAt) {
